@@ -1,0 +1,43 @@
+name: Infrastructure Automation CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Initialize
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Install Ansible
+        run: |
+          python3 -m pip install --user ansible
+
+      - name: Ansible Syntax Check
+        working-directory: ansible
+        run: ansible-playbook --syntax-check playbooks/site.yml
+
+      - name: Install Puppet
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y puppet
+
+      - name: Puppet Syntax Check
+        run: puppet parser validate puppet/manifests/site.pp
