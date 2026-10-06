@@ -1,0 +1,15 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Ansible
+.ansible/
+*.retry
+__pycache__/
+
+# OS / editor files
+.DS_Store
+.vscode/

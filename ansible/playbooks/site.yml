@@ -1,0 +1,42 @@
+---
+- name: Manage Infrastructure Automation Lab
+  hosts: local
+  become: false
+
+  tasks:
+
+    - name: Check Docker service
+      ansible.builtin.command: docker info
+      register: docker_status
+      changed_when: false
+
+    - name: Verify application container exists
+      ansible.builtin.command: docker inspect automation_lab_app
+      register: app_container
+      changed_when: false
+
+    - name: Verify web container exists
+      ansible.builtin.command: docker inspect automation_lab_web
+      register: web_container
+      changed_when: false
+
+    - name: Check application container is running
+      ansible.builtin.command:
+        cmd: docker inspect -f "{{ '{{' }}.State.Running{{ '}}' }}" automation_lab_app
+      register: app_running
+      changed_when: false
+
+    - name: Check web service
+      ansible.builtin.uri:
+        url: http://localhost:8080
+        return_content: true
+        status_code: 200
+
+    - name: Display infrastructure status
+      ansible.builtin.debug:
+        msg:
+          - "Docker: available"
+          - "Application container: {{ app_container.rc == 0 }}"
+          - "Web container: {{ web_container.rc == 0 }}"
+          - "Application running: {{ app_running.stdout }}"
+          - "Web service: responding on http://localhost:8080"
